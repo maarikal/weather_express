@@ -19,6 +19,9 @@ app.get('/', function (req, res) {
             let description = data.weather[0].description
             let city = data.name
             let temp = Math.round(parseFloat(data.main.temp)-273.15)
+            console.log(description)
+            console.log(city)
+            console.log(temp)
             res.render('index', {
                 description: description,
                 city: city,
