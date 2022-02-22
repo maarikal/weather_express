@@ -11,50 +11,66 @@ app.use(bodyParser.urlencoded({ extended: true }))
 const key = 'd43b9bc94518afe99cb9ba423d828c5b';
 let city = 'Tartu'
 
-app.get('/', function (req, res) {
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${
-        city}&appid=${key}`)
-        .then((response) => {
-        return response.json()
-    })
-        .then((data) => {
-            let description = data.weather[0].description
-            let city = data.name
-            let temp = Math.round(parseFloat(data.main.temp)-273.15)
-            console.log(description)
-            console.log(city)
-            console.log(temp)
-            res.render('index', {
-                description: description,
-                city: city,
-                temp: temp
+const getWeatherDataPromise = (url) => {
+    return new Promise((resolve,  reject) => {
+        fetch(url)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+                let description = data.weather[0].description
+                let city = data.name
+                let temp = Math.round(parseFloat(data.main.temp)-273.15)
+                let result = {
+                    description: description,
+                    city: city,
+                    temp: temp
+                }
+                resolve(result)
+            })
+            .catch(error => {
+                reject(error)
             })
     })
+}
+
+app.all("/", function (req, res) {
+    let city
+    if(req.method == "GET") {
+        city = "Tartu"
+    }
+    if(req.method == "POST") {
+        city = req.body.cityname
+    }
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${
+        city}&appid=${key}`
+    getWeatherDataPromise(url)
+        .then(data => {
+            res.render("index", data)
+        })
 })
 
-/*app.post('/', function (req, res){
-    console.log(req.body)
-    res.redirect('/')
+
+/* Ülesande 5 commitimmata kood enne app.all funktsiooni tegemist
+app.get('/', function (req, res) {
+    let city = "Tartu"
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${
+        city}&appid=${key}`
+        getWeatherDataPromise(url)
+        .then(data => {
+        res.render("index", data)
+        })
 })
-*/
 
 app.post('/', function(req, res) {
     let city = req.body.cityname
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${
-        city}&appid=${key}`)
-        .then((response) => {
-            return response.json()
-        })
-        .then((data) => {
-            let description = data.weather[0].description
-            let city = data.name
-            let temp = Math.round(parseFloat(data.main.temp) - 273.15)
-            res.render('index', {
-                description: description,
-                city: city,
-                temp: temp
-            })
+    let url =`https://api.openweathermap.org/data/2.5/weather?q=${
+        city}&appid=${key}`
+    getWeatherDataPromise(url)
+        .then(data => {
+            res.render("index", data)
         })
 })
+ */
 
 app.listen(3000)
