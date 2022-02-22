@@ -42,7 +42,7 @@ app.all("/", function (req, res) {
     }
     if(req.method == "POST") {
         city = req.body.cityname
-    }
+     }
     let url = `https://api.openweathermap.org/data/2.5/weather?q=${
         city}&appid=${key}`
     getWeatherDataPromise(url)
@@ -50,7 +50,13 @@ app.all("/", function (req, res) {
             res.render("index", data)
         })
         .catch(error => {
-            res.render("index", {error: "Problem with getting data, try again"})
+            let messages
+            if (city === "") {
+                messages = "Problem with city name, please add correct city name"
+            } else {
+                messages = "Problem with getting data, try again"
+            }
+            res.render("index", {error: messages})
         })
 })
 
